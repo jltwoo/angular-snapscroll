@@ -3,7 +3,7 @@
  * Version: 0.2.5
  * (c) 2014-2015 Joel Mukuthu
  * MIT License
- * Built on: 28-12-2015 23:00:40 EST
+ * Built on: 29-12-2015 00:19:47 EST
  **/
 
 (function () {
@@ -303,6 +303,7 @@
               unbindScroll,
               scrollPromise,
               bindScrollPromise,
+              lastScrollPosition = 0,
               snapToWidth = attributes.snapToWidth,
               snapEasing = attributes.snapEasing,
               scrollDelay = attributes.scrollDelay,
@@ -338,8 +339,10 @@
           };
 
           onScroll = function () {
+            var direction = lastScrollPosition > element[0][snapToWidth? 'scrollLeft':'scrollTop'];
+            lastScrollPosition = element[0][snapToWidth? 'scrollLeft':'scrollTop'];
             var snap = function () {
-              var newSnapIndex = Math.round(element[0][snapToWidth? 'scrollLeft':'scrollTop'] / scope[snapToWidth?'snapWidth':'snapHeight']);
+              var newSnapIndex = Math[direction?"floor":"ceil"](element[0][snapToWidth? 'scrollLeft':'scrollTop'] / scope[snapToWidth?'snapWidth':'snapHeight']);
               if (scope.snapIndex === newSnapIndex) {
                 snapTo(newSnapIndex);
               } else {
