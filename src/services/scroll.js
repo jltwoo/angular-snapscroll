@@ -15,7 +15,7 @@
       }
 
       return {
-        to: function (element, top, duration, easing) {
+        to: function (element, val, snapToWidth, duration, easing) {
           var start,
               change,
               animate,
@@ -26,7 +26,7 @@
 
           animate = function () {
             currentTime += increment;
-            element[0].scrollTop = easing(currentTime, start, change, duration);
+            element[0][snapToWidth?"scrollLeft":"scrollTop"] = easing(currentTime, start, change, duration);
             if(currentTime < duration) {
               animation = requestAnimation(animate, increment);
               element.data('snapscroll-animation', animation);
@@ -36,7 +36,7 @@
             }
           };
 
-          if (!angular.isElement(element) || !angular.isNumber(top)) {
+          if (!angular.isElement(element) || !angular.isNumber(val)) {
             return;
           }
 
@@ -52,14 +52,14 @@
           }
 
           if (duration === 0 || isNaN(duration)) {
-            element[0].scrollTop = top;
+            element[0][snapToWidth?"scrollLeft":"scrollTop"] = val;
             deferred.resolve();
           } else {
             if (typeof easing !== 'function') {
               easing = defaultSnapscrollScrollEasing;
             }
-            start = element[0].scrollTop;
-            change = top - start;
+            start = element[0][snapToWidth?"scrollLeft":"scrollTop"];
+            change = val - start;
             currentTime = 0;
             increment = 20;
             animate();

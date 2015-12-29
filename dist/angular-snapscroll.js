@@ -30,7 +30,7 @@
   'use strict';
 
   angular.module('snapscroll')
-    .directive('fitWindowHeight', ['$window', '$timeout', 'defaultSnapscrollResizeDelay',
+    .directive('fitWindowWidth', ['$window', '$timeout', 'defaultSnapscrollResizeDelay',
       function ($window, $timeout, defaultSnapscrollResizeDelay) {
         return {
           restrict: 'A',
@@ -42,11 +42,11 @@
 
             function onWindowResize() {
               if (resizeDelay === false) {
-                snapscroll.setSnapHeight($window.innerHeight);
+                snapscroll.setSnapWidth($window.innerWidth);
               } else {
                 $timeout.cancel(resizePromise);
                 resizePromise = $timeout(function () {
-                  snapscroll.setSnapHeight($window.innerHeight);
+                  snapscroll.setSnapWidth($window.innerWidth);
                 }, resizeDelay);
               }
             }
@@ -61,10 +61,10 @@
                 }
               }
 
-              // set initial snapHeight
-              snapscroll.setSnapHeight($window.innerHeight);
+              // set initial snapWidth
+              snapscroll.setSnapWidth($window.innerWidth);
 
-              // update snapHeight on window resize
+              // update snapWidth on window resize
               windowElement = angular.element($window);
               windowElement.on('resize', onWindowResize);
               scope.$on('$destroy', function () {
@@ -84,15 +84,15 @@
 
   var scopeObject = {
     snapIndex: '=?',
-    snapHeight: '=?',
+    snapWidth: '=?',
     beforeSnap: '&',
     afterSnap: '&',
     snapAnimation: '=?'
   };
 
   var controller = ['$scope', function ($scope) {
-    this.setSnapHeight = function (height) {
-      $scope.snapHeight = height;
+    this.setSnapWidth = function (width) {
+      $scope.snapWidth = width;
     };
   }];
 
@@ -100,22 +100,22 @@
     return angular.isNumber(value) && !isNaN(value);
   };
 
-  var watchSnapHeight = function (scope, callback) {
-    scope.$watch('snapHeight', function (snapHeight, previousSnapHeight) {
-      if (angular.isUndefined(snapHeight)) {
-        scope.snapHeight = scope.defaultSnapHeight;
+  var watchSnapWidth = function (scope, callback) {
+    scope.$watch('snapWidth', function (snapWidth, previousSnapWidth) {
+      if (angular.isUndefined(snapWidth)) {
+        scope.snapWidth = scope.defaultSnapWidth;
         return;
       }
-      if (!isNumber(snapHeight)) {
-        if (isNumber(previousSnapHeight)) {
-          scope.snapHeight = previousSnapHeight;
+      if (!isNumber(snapWidth)) {
+        if (isNumber(previousSnapWidth)) {
+          scope.snapWidth = previousSnapWidth;
         } else {
-          scope.snapHeight = scope.defaultSnapHeight;
+          scope.snapWidth = scope.defaultSnapWidth;
         }
         return;
       }
       if (angular.isFunction(callback)) {
-        callback(snapHeight);
+        callback(snapWidth);
       }
     });
   };
@@ -251,15 +251,15 @@
 
           snapTo = function (index, afterSnap) {
             var args,
-                top = index * scope.snapHeight;
+                left = index * scope.snapWidth;
             if (scope.snapAnimation) {
               if (angular.isDefined(snapEasing)) {
-                args = [element, top, snapDuration, snapEasing];
+                args = [element, left, snapDuration, snapEasing];
               } else {
-                args = [element, top, snapDuration];
+                args = [element, left, snapDuration];
               }
             } else {
-              args = [element, top];
+              args = [element, left];
             }
             if (!preventSnappingAfterManualScroll && scrollBound) {
               unbindScroll();
@@ -278,8 +278,8 @@
 
           onScroll = function () {
             var snap = function () {
-              var top = element[0].scrollTop,
-                  newSnapIndex = Math.round(top / scope.snapHeight);
+              var left = element[0].scrollLeft,
+                  newSnapIndex = Math.round(left / scope.snapWidth);
               if (scope.snapIndex === newSnapIndex) {
                 snapTo(newSnapIndex);
               } else {
@@ -337,7 +337,7 @@
               }
             });
 
-            scope.defaultSnapHeight = element[0].offsetHeight;
+            scope.defaultSnapWidth = element[0].offsetWidth;
 
             scope.snapIndexMin = function () {
               return 0;
@@ -351,14 +351,14 @@
               return snapIndex >= scope.snapIndexMin() && snapIndex <= scope.scopeIndexMax();
             };
 
-            element.css('overflowY', 'auto');
+            element.css('overflowX', 'auto');
 
-            watchSnapHeight(scope, function () {
+            watchSnapWidth(scope, function () {
               var snaps = element.children();
-              element.css('height', scope.snapHeight + 'px');
+              element.css('width', scope.snapWidth + 'px');
               if (snaps.length) {
                 angular.forEach(snaps, function (snap) {
-                  angular.element(snap).css('height', scope.snapHeight + 'px');
+                  angular.element(snap).css('width', scope.snapWidth + 'px');
                 });
               }
               snapTo(scope.snapIndex);
@@ -459,7 +459,7 @@
       }
 
       return {
-        to: function (element, top, duration, easing) {
+        to: function (element, left, duration, easing) {
           var start,
               change,
               animate,
@@ -470,7 +470,7 @@
 
           animate = function () {
             currentTime += increment;
-            element[0].scrollTop = easing(currentTime, start, change, duration);
+            element[0].scrollLeft = easing(currentTime, start, change, duration);
             if(currentTime < duration) {
               animation = requestAnimation(animate, increment);
               element.data('snapscroll-animation', animation);
@@ -480,7 +480,7 @@
             }
           };
 
-          if (!angular.isElement(element) || !angular.isNumber(top)) {
+          if (!angular.isElement(element) || !angular.isNumber(left)) {
             return;
           }
 
@@ -496,14 +496,14 @@
           }
 
           if (duration === 0 || isNaN(duration)) {
-            element[0].scrollTop = top;
+            element[0].scrollLeft = left;
             deferred.resolve();
           } else {
             if (typeof easing !== 'function') {
               easing = defaultSnapscrollScrollEasing;
             }
-            start = element[0].scrollTop;
-            change = top - start;
+            start = element[0].scrollLeft;
+            change = left - start;
             currentTime = 0;
             increment = 20;
             animate();
