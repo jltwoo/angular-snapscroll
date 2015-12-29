@@ -25,22 +25,22 @@
   };
 
   var watchSnapHW = function (scope, callback) {
-    var hw = snapToWidth?"snapWidth":"snapHeight";
-    scope.$watch(hw, function (new_hw, prev_hw) {
-      if (angular.isUndefined(new_hw)) {
+    var hw = scope.snapToWidth?'snapWidth':'snapHeight';
+    scope.$watch(hw, function (newHW, prevHW) {
+      if (angular.isUndefined(newHW)) {
         scope[hw] = scope.defaultSnapHW;
         return;
       }
-      if (!isNumber(new_hw)) {
-        if (isNumber(prev_hw)) {
-          scope[hw] = prev_hw;
+      if (!isNumber(newHW)) {
+        if (isNumber(prevHW)) {
+          scope[hw] = prevHW;
         } else {
           scope[hw] = scope.defaultSnapHW;
         }
         return;
       }
       if (angular.isFunction(callback)) {
-        callback(new_hw);
+        callback(newHW);
       }
     });
   };
@@ -107,7 +107,7 @@
 
       e.preventDefault();
 
-      delta = Math.max(-1, Math.min(1, (e.wheelDelta || -(e[snapToWidth?"deltaX":"deltaY"] || e.detail))));
+      delta = Math.max(-1, Math.min(1, (e.wheelDelta || -(e[scope.snapToWidth?'deltaX':'deltaY'] || e.detail))));
 
       if (isNaN(delta)) {
         return;
@@ -178,7 +178,7 @@
 
           snapTo = function (index, afterSnap) {
             var args,
-                val = index * scope[snapToWidth?"snapWidth":"snapHeight"];
+                val = index * scope[snapToWidth?'snapWidth':'snapHeight'];
             if (scope.snapAnimation) {
               if (angular.isDefined(snapEasing)) {
                 args = [element, val, snapToWidth, snapDuration, snapEasing];
@@ -205,7 +205,7 @@
 
           onScroll = function () {
             var snap = function () {
-              var newSnapIndex = Math.round(element[0][snapToWidth? "scrollLeft":"scrollTop"] / scope[snapToWidth?"snapWidth":"snapHeight"]);
+              var newSnapIndex = Math.round(element[0][snapToWidth? 'scrollLeft':'scrollTop'] / scope[snapToWidth?'snapWidth':'snapHeight']);
               if (scope.snapIndex === newSnapIndex) {
                 snapTo(newSnapIndex);
               } else {
